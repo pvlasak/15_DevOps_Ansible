@@ -19,3 +19,16 @@
       unarchive: 
         src: /work/proj/devops_bootcamp/15_DevOps_Ansible/nodejs-app/nodejs-app-1.0.0.tgz
         dest: /root/ 
+    - name: Install dependencies
+      npm:
+        path: /root/package
+    - name: Start the application
+      command: 
+        chdir: /root/package/app/
+        cmd: node server.js
+      async: 1000
+      poll: 0
+    - name: Ensure the application is running
+      shell: ps aux | grep node 
+      register: process_status
+    - debug: msg={{process_status.stdout_lines}}
