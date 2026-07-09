@@ -12,19 +12,33 @@
         pkg:
           - nodejs
           - npm
+
+
+- name: Create new Linux User for nodejs application
+  hosts: 165.232.127.190
+  tasks: 
+    - name: Create linux user
+      user:
+        name: app_user
+        comment: node application user
+        group: admin
+
+
 - name: Deploy nodejs app
   hosts: 165.232.127.190
+  become: True
+  become_user: app_user
   tasks:  
     - name: Copy and Unpack the nodejs file 
       unarchive: 
         src: /work/proj/devops_bootcamp/15_DevOps_Ansible/nodejs-app/nodejs-app-1.0.0.tgz
-        dest: /root/ 
+        dest: /home/app_user 
     - name: Install dependencies
       npm:
-        path: /root/package
+        path: /home/app_user/package
     - name: Start the application
       command: 
-        chdir: /root/package/app/
+        chdir: /home/app_user/package/app/
         cmd: node server.js
       async: 1000
       poll: 0
