@@ -1,0 +1,4 @@
+linux_username: linux_user
+location: /work/proj/devops_bootcamp/15_DevOps_Ansible/nodejs-app/
+destination: /home/{{linux_username}}
+version: 1.0.0

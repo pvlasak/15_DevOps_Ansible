@@ -16,32 +16,36 @@
 
 - name: Create new Linux User for nodejs application
   hosts: 165.232.127.190
+  vars_files:
+    - app_deploy_vars
   tasks: 
     - name: Create linux user
       user:
-        name: app_user
+        name: "{{linux_username}}"
         comment: node application user
         group: admin
       register: user_creation
-    - debug: msg={{user_creation}}
+    - debug: msg={{user_creation.name}}
     
 
 
 - name: Deploy nodejs app
   hosts: 165.232.127.190
+  vars_files:
+    - app_deploy_vars
   become: True
-  become_user: app_user
+  become_user: "{{linux_username}}"
   tasks:  
     - name: Copy and Unpack the nodejs file 
       unarchive: 
-        src: /work/proj/devops_bootcamp/15_DevOps_Ansible/nodejs-app/nodejs-app-1.0.0.tgz
-        dest: /home/app_user 
+        src: "{{location}}nodejs-app-{{version}}.tgz"
+        dest: "{{destination}}"
     - name: Install dependencies
       npm:
-        path: /home/app_user/package
+        path: "{{destination}}/package"
     - name: Start the application
       command: 
-        chdir: /home/app_user/package/app/
+        chdir: "{{destination}}/package/app/"
         cmd: node server.js
       async: 1000
       poll: 0
