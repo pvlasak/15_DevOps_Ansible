@@ -1,7 +1,0 @@
-[droplet]
-165.232.127.190
-64.226.125.108
-
-[droplet:vars]
-ansible_ssh_private_key_file=~/.ssh/id_ed25519_do 
-ansible_user=root
