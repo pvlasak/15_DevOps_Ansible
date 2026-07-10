@@ -22,6 +22,9 @@
         name: app_user
         comment: node application user
         group: admin
+      register: user_creation
+    - debug: msg={{user_creation}}
+    
 
 
 - name: Deploy nodejs app
