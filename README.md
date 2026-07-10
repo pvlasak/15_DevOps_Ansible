@@ -12,3 +12,21 @@ repository to store project on configuration management with Ansible
 - location where public access key is saved: `~/.ssh/authorized_keys`
 - copy public ssh key into `~/.ssh/authorized_keys` on target server: *ssh-copy-id -i identity_file root@ip_address*
 - disable host key checking in `ansible.cfg` file in [defaults] sections as: *host_key_checking = False*
+
+**branch deploy_nodejs_app**
+- branch containing ansible inventory file and ansible playbook to deploy node js application on remote server
+- ansible playbook uses variable defintions inside `app_deploy_vars` and is thefore parameterized. 
+- ansible playbook contains these plays:
+1. update apt repository and installs node and npm
+2. creates new linux user
+3. deploys node js application 
+    a) copies and unpacks tar archive
+    b) installs dependencies using package.json
+    c) starts server.js
+    d) checks if node process is running under defined user. 
+
+**branch deploy_nexus**
+- `deploy_nexus.yaml` - definition of ansible playbook
+- updates apt cache, installs openjdk and net-tools
+- downloads tar archive, unpacks it and finds the nexus directory
+- renames nexus directory to `nexus` only in case the task was not initiated before. For this check the builtin.stat module is used to get facts about the file. Rename task evaluates the `when conditional` to check if it should be skipped or executed. 
