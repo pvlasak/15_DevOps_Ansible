@@ -1,0 +1,50 @@
+---
+- name: Configure nexus server
+  hosts: nexus_server
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        force_apt_get: yes
+        cache_valid_time: 3600
+        update_cache: yes
+    - name: Install OpenJDK-8
+      ansible.builtin.apt:
+        name: openjdk-8-jre-headless
+        state: present
+    - name: Install net-tools
+      ansible.builtin.apt:
+        name: net-tools
+        state: present
+  
+- name: Download Nexus Installer and unpack it
+  hosts: nexus_server
+  tasks:
+    - name: Download Nexus Installer
+      ansible.builtin.get_url:
+        url: https://download.sonatype.com/nexus/3/latest-linux-x86_64.tar.gz
+        dest: /opt/
+      register: nexus_download_result
+    - debug: msg={{ nexus_download_result }}
+    - name: Extract Nexus Archive
+      ansible.builtin.unarchive:
+        src: "{{nexus_download_result.dest}}"
+        dest: /opt/
+        remote_src: yes
+    - name: Find Nexus Directory
+      ansible.builtin.find:
+        paths: /opt
+        patterns: "nexus-*"
+        file_type: directory
+        recurse: no
+      register: nexus_dir
+    - name: Check if Nexus Directory exists
+      stat:
+        path: /opt/nexus
+      register: stat_nexus_dir
+    - debug: msg={{ stat_nexus_dir }}
+    - name: Rename Nexus Directory
+      ansible.builtin.shell:
+        cmd: mv {{nexus_dir.files[0].path}} /opt/nexus
+      when: stat_nexus_dir.stat.exists == false
+
+  
