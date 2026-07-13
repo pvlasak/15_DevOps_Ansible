@@ -16,13 +16,19 @@
         name: net-tools
         state: present
   
-- name: Download Nexus Installer and unpack it
+- name: Download Nexus Installer and Unpack
   hosts: nexus_server
   tasks:
+    - name: Check if nexus directory exists
+      stat:
+        path: /opt/nexus
+      register: stat_nexus_dir
+    - debug: msg={{ stat_nexus_dir }}
     - name: Download Nexus Installer
       ansible.builtin.get_url:
         url: https://download.sonatype.com/nexus/3/latest-linux-x86_64.tar.gz
         dest: /opt/
+      when: stat_nexus_dir.stat.exists == false
       register: nexus_download_result
     - debug: msg={{ nexus_download_result }}
     - name: Extract Nexus Archive
@@ -30,6 +36,7 @@
         src: "{{nexus_download_result.dest}}"
         dest: /opt/
         remote_src: yes
+      when: stat_nexus_dir.stat.exists == false
     - name: Find Nexus Directory
       ansible.builtin.find:
         paths: /opt
@@ -37,14 +44,69 @@
         file_type: directory
         recurse: no
       register: nexus_dir
-    - name: Check if Nexus Directory exists
-      stat:
-        path: /opt/nexus
-      register: stat_nexus_dir
-    - debug: msg={{ stat_nexus_dir }}
     - name: Rename Nexus Directory
       ansible.builtin.shell:
         cmd: mv {{nexus_dir.files[0].path}} /opt/nexus
       when: stat_nexus_dir.stat.exists == false
 
-  
+- name: Create Nexus User and Change Ownership of directories
+  hosts: nexus_server
+  tasks:
+    - name: Create nexus group
+      ansible.builtin.group:
+        name: nexus
+        state: present
+    - name: Create nexus user
+      ansible.builtin.user:
+        name: nexus
+        group: nexus
+        home: /opt/nexus
+        shell: /bin/bash
+        state: present
+    - name: Change ownership of nexus directory
+      ansible.builtin.file:
+        path: /opt/nexus
+        owner: nexus
+        group: nexus
+        state: directory    
+        recurse: yes
+    - name: Change ownership of sonatype-work directory
+      ansible.builtin.file:
+        path: /opt/sonatype-work
+        owner: nexus
+        group: nexus
+        state: directory    
+        recurse: yes
+
+- name: Configure Nexus binary and start nexus application
+  hosts: nexus_server
+  tasks:
+    - name: Edit nexus configuration file. 
+      ansible.builtin.lineinfile:
+        path: /opt/nexus/bin/nexus
+        regexp: "^run_as_user=''"
+        line: 'run_as_user="nexus"'
+    - name: Start Nexus
+      become: true
+      become_user: nexus
+      ansible.builtin.command:
+        cmd: /opt/nexus/bin/nexus start
+- name: Verify Nexus is running
+  hosts: nexus_server
+  tasks:  
+    - name: Check status with ps command
+      ansible.builtin.shell:
+        cmd: ps -ef | grep nexus
+      register: process_status
+    - debug: msg={{ process_status.stdout_lines }}
+    - name: Wait one minute to before nestat check. 
+      ansible.builtin.pause:
+        minutes: 1
+    - name: Check status with netstat command 
+      ansible.builtin.shell:
+        cmd: netstat -lnpt
+      register: nestat_status
+    - debug: msg={{ nestat_status.stdout_lines }}
+
+
+    
