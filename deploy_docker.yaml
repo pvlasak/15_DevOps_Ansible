@@ -1,0 +1,21 @@
+---
+- name: Make sure the docker is running
+  hosts: docker_server
+  tasks:
+    - name: Install docker
+      yum: 
+        name: docker
+        state: present
+        update_cache: yes
+    - name: Add user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+    - name: Start docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+    
+
