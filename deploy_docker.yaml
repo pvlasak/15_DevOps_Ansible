@@ -52,4 +52,26 @@
       register: compose_version
     - debug: msg="{{compose_version.stdout}}"
 
- 
+- name: Run docker images by docker compose
+  hosts: docker_server  
+  vars_prompt:
+    - name: dockerhub_password
+      prompt: "Enter your DockerHub password for user petrdeveloper"
+      private: yes
+  vars_files:
+    - project-vars
+  tasks:
+    - name: Copy Docker Compose File to sever
+      copy:
+        src: docker-compose-full.yaml
+        dest: "{{ec2_home}}/docker-compose.yaml"
+    - name: Docker Login
+      community.docker.docker_login:
+        username: petrdeveloper
+        password: "{{dockerhub_password}}"
+    - name: Run docker compose
+      community.docker.docker_compose_v2: 
+        project_src: "{{ec2_home}}"
+        files:
+          - docker-compose.yaml
+        state: present
