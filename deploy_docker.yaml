@@ -1,6 +1,8 @@
 ---
 - name: Make sure the docker is running
   hosts: docker_server
+  vars_files:
+    - project-vars
   become: yes
   tasks:
     - name: Install docker
@@ -8,11 +10,10 @@
         name: docker
         state: present
         update_cache: yes
-    - name: Add user to docker group
+    - name: Creates user and adds user to docker group
       user:
-        name: ec2-user
-        groups: docker
-        append: yes
+        name: "{{linux_user}}"
+        groups: [docker]
     - name: Reset SSH connection
       meta: reset_connection
 
