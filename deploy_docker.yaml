@@ -23,6 +23,33 @@
         enabled: yes
       register: service_status
     - debug: msg="{{service_status.state}}"
-    
+
+- name: Make docker-compose available
+  hosts: docker_server
+  vars_files:
+    - project-vars
+  tasks:
+    - name: Create cli plugin directory
+      file: 
+        path: "{{ec2_home}}/.docker/cli-plugins"
+        state: directory
+    - name: Get operating system info
+      command: uname -s
+      register: linux_os
+    - name: Get architecture
+      command: uname -m
+      register: linux_arch   
+    - name: Download docker-compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-{{linux_os.stdout | lower}}-{{linux_arch.stdout}}"
+        dest: "{{ec2_home}}/.docker/cli-plugins/docker-compose"
+    - name: Add executable permisson to docker-compose
+      file:
+        path: "{{ec2_home}}/.docker/cli-plugins/docker-compose"
+        mode: +x
+    - name: check the docker compose version
+      command: docker compose version
+      register: compose_version
+    - debug: msg="{{compose_version.stdout}}"
 
  
