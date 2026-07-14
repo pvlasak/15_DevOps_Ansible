@@ -1,1 +1,2 @@
-ec2_home: /home/ec2-user
+linux_user: docker-user
+ec2_home: /home/{{linux_user}}
