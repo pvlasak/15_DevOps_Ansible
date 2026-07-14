@@ -1,6 +1,7 @@
 ---
 - name: Make sure the docker is running
   hosts: docker_server
+  become: yes
   tasks:
     - name: Install docker
       yum: 
@@ -12,10 +13,16 @@
         name: ec2-user
         groups: docker
         append: yes
+    - name: Reset SSH connection
+      meta: reset_connection
+
     - name: Start docker service
       systemd:
         name: docker
         state: started
         enabled: yes
+      register: service_status
+    - debug: msg="{{service_status.state}}"
     
 
+ 

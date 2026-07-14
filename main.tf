@@ -9,6 +9,7 @@ variable avail_zone {}
 variable my-ip {}
 variable instance_type {}
 variable public_key_location {}
+variable image_name {}
 
 resource "aws_vpc" "myapp-vpc" {
     cidr_block = var.vpc_cidr_block
@@ -78,7 +79,7 @@ data "aws_ami" "latest_amazon_linux_image" {
     owners = ["amazon"]
     filter {
         name = "name"
-        values = ["amzn2-ami-kernel-*gp2"]
+        values = [var.image_name]
     }
     filter {
         name = "virtualization-type"
@@ -100,8 +101,6 @@ resource "aws_instance" "myapp-server" {
 
     associate_public_ip_address = true
     key_name = aws_key_pair.ssh-key.key_name
-
-    user_data = file("entry_script.sh")
     
     user_data_replace_on_change = true
 
