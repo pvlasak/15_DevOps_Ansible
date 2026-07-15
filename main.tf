@@ -9,6 +9,7 @@ variable avail_zone {}
 variable my-ip {}
 variable instance_type {}
 variable public_key_location {}
+variable private_key_location {}
 variable image_name {}
 
 resource "aws_vpc" "myapp-vpc" {
@@ -107,7 +108,13 @@ resource "aws_instance" "myapp-server" {
     tags = {
         Name: "${var.env_prefix}-server"
     }
+    
+    provisioner "local-exec" {
+        working_dir = "/work/proj/devops_bootcamp/15_DevOps_Ansible"
+        command = "ansible-playbook --inventory ${self.public_ip}, --user ec2-user --private-key ${var.private_key_location} deploy_docker.yaml"
+    }
 }
+
 
 resource "aws_key_pair" "ssh-key" {
     key_name = "server-key"
