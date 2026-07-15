@@ -1,6 +1,21 @@
 ---
+- name: Make sure the server is reachable
+  hosts: all
+  gather_facts: False
+  tasks:
+    - name: Check if the port 22 is open and contain "OpenSSH"
+      wait_for:
+        port: 22
+        delay: 10
+        timeout: 300
+        search_regex: OpenSSH
+        host: "{{ lookup('config', 'host', plugin_name='ssh', plugin_type='connection') }}"
+      vars:
+        ansible_connection: local
+        ansible_python_interpreter: /usr/bin/python3
+
 - name: Make sure the docker is running
-  hosts: docker_server
+  hosts: all
   vars_files:
     - project-vars
   become: yes
@@ -10,10 +25,11 @@
         name: docker
         state: present
         update_cache: yes
-    - name: Creates user and adds user to docker group
+    - name: Add user to docker group
       user:
         name: "{{linux_user}}"
-        groups: [docker]
+        groups: docker
+        append: yes
     - name: Reset SSH connection
       meta: reset_connection
 
@@ -26,7 +42,7 @@
     - debug: msg="{{service_status.state}}"
 
 - name: Make docker-compose available
-  hosts: docker_server
+  hosts: all
   vars_files:
     - project-vars
   tasks:
@@ -54,11 +70,7 @@
     - debug: msg="{{compose_version.stdout}}"
 
 - name: Run docker images by docker compose
-  hosts: docker_server  
-  vars_prompt:
-    - name: dockerhub_password
-      prompt: "Enter your DockerHub password for user petrdeveloper"
-      private: yes
+  hosts: all  
   vars_files:
     - project-vars
   tasks:

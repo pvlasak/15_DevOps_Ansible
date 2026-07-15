@@ -1,2 +1,3 @@
-linux_user: docker-user
+linux_user: ec2-user
 ec2_home: /home/{{linux_user}}
+dockerhub_password: 
