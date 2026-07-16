@@ -107,7 +107,7 @@ resource "aws_instance" "myapp-server-1" {
     user_data_replace_on_change = true
 
     tags = {
-        Name: "${var.env_prefix}-server-1"
+        Name: "prod-server"
     }
 }
 
@@ -125,7 +125,7 @@ resource "aws_instance" "myapp-server-2" {
     user_data_replace_on_change = true
 
     tags = {
-        Name: "${var.env_prefix}-server-2"
+        Name: "prod-server"
     }
 }
 
@@ -143,7 +143,7 @@ resource "aws_instance" "myapp-server-3" {
     user_data_replace_on_change = true
 
     tags = {
-        Name: "${var.env_prefix}-server-3"
+        Name: "dev-server"
     }
 }
 
@@ -161,7 +161,7 @@ resource "aws_instance" "myapp-server-4" {
     user_data_replace_on_change = true
 
     tags = {
-        Name: "${var.env_prefix}-server-4"
+        Name: "dev-server"
     }
 }
 
