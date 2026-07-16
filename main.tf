@@ -14,6 +14,7 @@ variable image_name {}
 
 resource "aws_vpc" "myapp-vpc" {
     cidr_block = var.vpc_cidr_block
+    enable_dns_hostnames = true
     tags = {
         Name: "${var.env_prefix}-vpc"
     }
@@ -92,7 +93,7 @@ data "aws_ami" "latest_amazon_linux_image" {
     value = data.aws_ami.latest_amazon_linux_image
 }*/
 
-resource "aws_instance" "myapp-server" {
+resource "aws_instance" "myapp-server-1" {
     ami = data.aws_ami.latest_amazon_linux_image.id 
     instance_type = var.instance_type
 
@@ -106,27 +107,81 @@ resource "aws_instance" "myapp-server" {
     user_data_replace_on_change = true
 
     tags = {
-        Name: "${var.env_prefix}-server"
+        Name: "${var.env_prefix}-server-1"
     }
 }
 
-resource "null_resource" "configure_server" {
-    triggers = {
-        public_ip = aws_instance.myapp-server.public_ip
-    }
-    provisioner "local-exec" {
-        working_dir = "/work/proj/devops_bootcamp/15_DevOps_Ansible"
-        command = "ansible-playbook --inventory ${aws_instance.myapp-server.public_ip}, --user ec2-user --private-key ${var.private_key_location} deploy_docker.yaml"
+resource "aws_instance" "myapp-server-2" {
+    ami = data.aws_ami.latest_amazon_linux_image.id 
+    instance_type = var.instance_type
+
+    subnet_id = aws_subnet.myapp-subnet-1.id 
+    vpc_security_group_ids = [aws_default_security_group.default-sg.id]
+    availability_zone = var.avail_zone
+
+    associate_public_ip_address = true
+    key_name = aws_key_pair.ssh-key.key_name
+    
+    user_data_replace_on_change = true
+
+    tags = {
+        Name: "${var.env_prefix}-server-2"
     }
 }
 
+resource "aws_instance" "myapp-server-3" {
+    ami = data.aws_ami.latest_amazon_linux_image.id 
+    instance_type = var.instance_type
+
+    subnet_id = aws_subnet.myapp-subnet-1.id 
+    vpc_security_group_ids = [aws_default_security_group.default-sg.id]
+    availability_zone = var.avail_zone
+
+    associate_public_ip_address = true
+    key_name = aws_key_pair.ssh-key.key_name
+    
+    user_data_replace_on_change = true
+
+    tags = {
+        Name: "${var.env_prefix}-server-3"
+    }
+}
+
+resource "aws_instance" "myapp-server-4" {
+    ami = data.aws_ami.latest_amazon_linux_image.id 
+    instance_type = "t2.small"
+
+    subnet_id = aws_subnet.myapp-subnet-1.id 
+    vpc_security_group_ids = [aws_default_security_group.default-sg.id]
+    availability_zone = var.avail_zone
+
+    associate_public_ip_address = true
+    key_name = aws_key_pair.ssh-key.key_name
+    
+    user_data_replace_on_change = true
+
+    tags = {
+        Name: "${var.env_prefix}-server-4"
+    }
+}
 
 resource "aws_key_pair" "ssh-key" {
     key_name = "server-key"
     public_key = file(var.public_key_location)
 }
 
-output "ec2-public-ip" {
-    value = aws_instance.myapp-server.public_ip
+output "ec2-public-ip-one" {
+    value = aws_instance.myapp-server-1.public_ip
 }
+output "ec2-public-ip-two" {
+    value = aws_instance.myapp-server-2.public_ip
+}
+
+output "ec2-public-ip-three" {
+    value = aws_instance.myapp-server-3.public_ip
+}
+output "ec2-public-ip-four" {
+    value = aws_instance.myapp-server-4.public_ip
+}
+
 

@@ -1,6 +1,6 @@
 ---
 - name: Make sure the server is reachable
-  hosts: all
+  hosts: aws_ec2
   gather_facts: False
   tasks:
     - name: Check if the port 22 is open and contain "OpenSSH"
@@ -15,7 +15,7 @@
         ansible_python_interpreter: /usr/bin/python3
 
 - name: Make sure the docker is running
-  hosts: all
+  hosts: aws_ec2
   vars_files:
     - project-vars
   become: yes
@@ -42,7 +42,7 @@
     - debug: msg="{{service_status.state}}"
 
 - name: Make docker-compose available
-  hosts: all
+  hosts: aws_ec2
   vars_files:
     - project-vars
   tasks:
@@ -70,7 +70,7 @@
     - debug: msg="{{compose_version.stdout}}"
 
 - name: Run docker images by docker compose
-  hosts: all  
+  hosts: aws_ec2  
   vars_files:
     - project-vars
   tasks:
