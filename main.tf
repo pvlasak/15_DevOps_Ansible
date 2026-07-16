@@ -108,10 +108,15 @@ resource "aws_instance" "myapp-server" {
     tags = {
         Name: "${var.env_prefix}-server"
     }
-    
+}
+
+resource "null_resource" "configure_server" {
+    triggers = {
+        public_ip = aws_instance.myapp-server.public_ip
+    }
     provisioner "local-exec" {
         working_dir = "/work/proj/devops_bootcamp/15_DevOps_Ansible"
-        command = "ansible-playbook --inventory ${self.public_ip}, --user ec2-user --private-key ${var.private_key_location} deploy_docker.yaml"
+        command = "ansible-playbook --inventory ${aws_instance.myapp-server.public_ip}, --user ec2-user --private-key ${var.private_key_location} deploy_docker.yaml"
     }
 }
 
@@ -124,3 +129,4 @@ resource "aws_key_pair" "ssh-key" {
 output "ec2-public-ip" {
     value = aws_instance.myapp-server.public_ip
 }
+
