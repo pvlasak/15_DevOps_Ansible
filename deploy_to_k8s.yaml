@@ -1,0 +1,17 @@
+---
+- name: Deploy application on Kubernetes Cluster
+  hosts: localhost
+  tasks:
+    - name: Create a k8s namespace
+      kubernetes.core.k8s:
+        name: my-app
+        api_version: v1
+        kind: Namespace
+        state: present
+        kubeconfig: /home/petr-ubuntu/terraform/kubeconfig_myapp-eks-cluster
+    - name: Deploy nginx application in the namespace my-app
+      kubernetes.core.k8s:
+        src: /work/proj/devops_bootcamp/15_DevOps_Ansible/nginx_config.yaml
+        state: present
+        kubeconfig: /home/petr-ubuntu/terraform/kubeconfig_myapp-eks-cluster
+        namespace: my-app
