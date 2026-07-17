@@ -45,3 +45,11 @@ repository to store project on configuration management with Ansible
 
 - Terraform may automatically starts an ansible configuration through *provisioner local-exec*
 - provisioner can be wrapped into a terraform *null_resource* defintion and optional trigger parameter can be defined and may have instance's public ip address as a value. 
+
+**branch dyn_inventory_ec2**
+- ansible plugin `amazon.aws.aws_ec2` is used to get inventory hosts from AWS EC2
+- plugin needs python, boto3 and botocore libraries to be installed. 
+- dynamic invetory filename must end with the string **aws_ec2.yaml**.
+- `ansible.cfg` file has to enable the plugin : *enable_plugins = amazon.aws.aws_ec2* 
+- dynamic inventory file may also filter instances, for example according to tag name
+- dynamic inventory file may also group instances according different attributesme
