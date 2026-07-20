@@ -1,0 +1,86 @@
+---
+- name: Make sure the server is reachable
+  hosts: aws_ec2
+  gather_facts: False
+  tasks:
+    - name: Check if the port 22 is open and contain "OpenSSH"
+      wait_for:
+        port: 22
+        delay: 10
+        timeout: 300
+        search_regex: OpenSSH
+        host: "{{ lookup('config', 'host', plugin_name='ssh', plugin_type='connection') }}"
+      vars:
+        ansible_connection: local
+        ansible_python_interpreter: /usr/bin/python3
+
+- name: Make sure the docker is running
+  hosts: aws_ec2
+  become: yes
+  tasks:
+    - name: Install docker
+      yum: 
+        name: docker
+        state: present
+        update_cache: yes
+    - name: Add user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+    - name: Reset SSH connection
+      meta: reset_connection
+
+    - name: Start docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      register: service_status
+    - debug: msg="{{service_status.state}}"
+
+- name: Make docker-compose available
+  hosts: aws_ec2
+  tasks:
+    - name: Create cli plugin directory
+      file: 
+        path: /home/ec2-user/.docker/cli-plugins
+        state: directory
+    - name: Get operating system info
+      command: uname -s
+      register: linux_os
+    - name: Get architecture
+      command: uname -m
+      register: linux_arch   
+    - name: Download docker-compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-{{linux_os.stdout | lower}}-{{linux_arch.stdout}}"
+        dest: /home/ec2-user/.docker/cli-plugins/docker-compose
+    - name: Add executable permisson to docker-compose
+      file:
+        path: /home/ec2-user/.docker/cli-plugins/docker-compose
+        mode: +x
+    - name: check the docker compose version
+      command: docker compose version
+      register: compose_version
+    - debug: msg="{{compose_version.stdout}}"
+
+- name: Run docker images by docker compose
+  hosts: aws_ec2  
+  vars_files:
+    - project-vars
+  tasks:
+    - name: Copy Docker Compose File to sever
+      copy:
+        src: docker-compose.yaml
+        dest: /home/ec2-user/docker-compose.yaml
+    - name: Docker Login
+      community.docker.docker_login:
+        username: petrdeveloper
+        password: "{{dockerhub_password}}"
+    - name: Run docker compose
+      community.docker.docker_compose_v2: 
+        project_src: /home/ec2-user
+        files:
+          - docker-compose.yaml
+        state: present
