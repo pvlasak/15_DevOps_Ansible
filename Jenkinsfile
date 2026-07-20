@@ -12,7 +12,7 @@ pipeline {
                 script {
                     echo "copying files to ansible server..."
                     sshagent(credentials: ['ansible-user']) {
-                        sh "scp ansible/* root@${ANSIBLE_SERVER}:/root/"
+                        sh "scp -o StrictHostKeyChecking=no ansible/* root@${ANSIBLE_SERVER}:/root/"
                      }
                 }
             }
