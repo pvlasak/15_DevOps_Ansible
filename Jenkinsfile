@@ -33,7 +33,8 @@ pipeline {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ansible-server-key', keyFileVariable: 'keyfile', usernameVariable: 'user')]) {
                         remote.user = user
                         remote.identityFile = keyfile
-                        sshCommand remote: remote, command: 'ls -l'
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            sshCommand remote: remote, command: 'ansible-playbook -e dockerhub_password=${DOCKER_PASS} my-playbook.yaml'
                     }
                 }
             }            
