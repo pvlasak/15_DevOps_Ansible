@@ -15,7 +15,7 @@ pipeline {
                         sh "scp -o StrictHostKeyChecking=no ansible/* root@${ANSIBLE_SERVER}:/root/"
  
                         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ansible', keyFileVariable: 'keyfile', usernameVariable: 'user')]) {
-                            sh 'scp ${keyfile} root@${ANSIBLE_SERVER}:/root/ssh-key.pem'
+                            sh 'scp ${keyfile} root@${ANSIBLE_SERVER}:/root/.ssh/ssh-key.pem'
                         }
                     }
                 }
@@ -34,7 +34,7 @@ pipeline {
                         remote.user = user
                         remote.identityFile = keyfile
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            sshCommand remote: remote, command: "ansible-playbook -e dockerhub_password=${DOCKER_PASS} my-playbook.yaml"                           
+                            sshCommand remote: remote, command: "ansible-playbook my-playbook.yaml -e dockerhub_password=${DOCKER_PASS}"                           
                         }
                     }
                 }
