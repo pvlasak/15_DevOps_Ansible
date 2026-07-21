@@ -70,7 +70,7 @@
   vars_files:
     - project-vars
   tasks:
-    - name: Copy Docker Compose File to sever
+    - name: Copy Docker Compose File to server
       copy:
         src: docker-compose.yaml
         dest: /home/ec2-user/docker-compose.yaml
