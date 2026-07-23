@@ -73,10 +73,10 @@ repository to store project on configuration management with Ansible
     5. EC2 instance is running on AWS and is accessible with a private key
     
 - *Jenkinsfile is divided into two stages:* <br>
-    A. Copy all files needed for Ansible configuration - ansible playbook, docker compose file, vars file, ansible.cfg file <br>
+A. Copy all files needed for Ansible configuration - ansible playbook, docker compose file, vars file, ansible.cfg file <br>
     - Jenkins `sshagent plugin` is used to copy ansible files to ansible server
     - AWS private key saved in Jenkins as credential `SSH Username with private key` 
     - Jenkins accesses the AWS private key and copies a file to `/root/.ssh/` on ansible server <br>
-    B. execution of ansible commands on remote ansible server <br>
+B. execution of ansible commands on remote ansible server <br>
     - remote server must be defined as a groovy object. 
     - using plugins `withCredentials` and `sshCommand` Jenkins is able to execute ansible playbook on a remote ansible server and configure AWS EC2 instances by running a docker compose file. 
