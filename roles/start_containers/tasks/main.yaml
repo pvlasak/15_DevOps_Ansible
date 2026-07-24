@@ -5,12 +5,13 @@
 
     - name: Copy Docker Compose File to sever
       copy:
-        src: /work/proj/devops_bootcamp/15_DevOps_Ansible/docker-compose-full.yaml
+        src: docker-compose.yaml
         dest: "/home/{{linux_user}}/docker-compose.yaml"
 
     - name: Docker Login
       community.docker.docker_login:
-        username: petrdeveloper
+        registry_url: "{{ docker_registry }}"
+        username: "{{ docker_username }}"
         password: "{{dockerhub_password}}"
 
     - name: Run docker compose
