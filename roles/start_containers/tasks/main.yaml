@@ -1,0 +1,21 @@
+    - name: Show current user
+      command: whoami
+      register: current_user
+    - debug: msg="Running as {{ current_user.stdout }}"
+
+    - name: Copy Docker Compose File to sever
+      copy:
+        src: /work/proj/devops_bootcamp/15_DevOps_Ansible/docker-compose-full.yaml
+        dest: "/home/{{linux_user}}/docker-compose.yaml"
+
+    - name: Docker Login
+      community.docker.docker_login:
+        username: petrdeveloper
+        password: "{{dockerhub_password}}"
+
+    - name: Run docker compose
+      community.docker.docker_compose_v2:
+        project_src: "/home/{{linux_user}}"
+        files:
+          - docker-compose.yaml
+        state: present
