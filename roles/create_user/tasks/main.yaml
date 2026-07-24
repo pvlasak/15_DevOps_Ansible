@@ -1,4 +1,4 @@
 - name: Create linux user
   user:
     name: "{{linux_user}}"
-    groups: adm,docker
+    groups: "{{ groups_to_user }}"
