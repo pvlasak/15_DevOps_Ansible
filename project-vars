@@ -1,3 +1,2 @@
-linux_user: ec2-user
-ec2_home: /home/{{linux_user}}
-dockerhub_password: 
+linux_user: peter
+dockerhub_password: AjkDUj532
