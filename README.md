@@ -72,12 +72,20 @@ repository to store project on configuration management with Ansible
     4. ansible is installed on the ansible server
     5. EC2 instance is running on AWS and is accessible with a private key
     
-- *Jenkinsfile is divided into two stages:* <br>
-A. Copy all files needed for Ansible configuration - ansible playbook, docker compose file, vars file, ansible.cfg file <br>
-    <li>Jenkins `sshagent plugin` is used to copy ansible files to ansible server</li>
-    <li>AWS private key saved in Jenkins as credential `SSH Username with private key` </li>
-    <li>Jenkins accesses the AWS private key and copies a file to `/root/.ssh/` on ansible server </li>
-    
-B. execution of ansible commands on remote ansible server <br>
-    <li> remote server must be defined as a groovy object. </li>
-    <li> using plugins `withCredentials` and `sshCommand` Jenkins is able to execute ansible playbook on a remote ansible server and configure AWS EC2 instances by running a docker compose file. </li>
+#### Jenkinsfile is divided into two stages:
+A. Copy all files needed for Ansible configuration - ansible playbook, docker compose file, vars file, ansible.cfg file
+- Jenkins `sshagent plugin` is used to copy ansible files to ansible server
+- AWS private key saved in Jenkins as credential `SSH Username with private key`
+- Jenkins accesses the AWS private key and copies a file to `/root/.ssh/` on ansible server
+
+B. execution of ansible commands on remote ansible server 
+- remote server must be defined as a groovy object.
+- using plugins `withCredentials` and `sshCommand` Jenkins is able to execute ansible playbook on a remote ansible server and configure AWS EC2 instances by running a docker compose file.
+
+**branch deploy_ec2_with_roles**
+- ansible playbook has new roles *create_user* and *start_containers*
+- each role is defined by a given sructure of data and few types of data are existing there:
+    1. `roles/<role_name>/tasks/main.yaml` defining role's tasks to be executed. 
+    2. `roles/<role_name>/defaults/main.yaml` defining default values of ansible variables
+    3. `roles/<role_name>/vars/main.yaml` - assigning values to variables used for a role. 
+    4. `roles/<role_name>/files/` - static files that are referenced by a role. 
