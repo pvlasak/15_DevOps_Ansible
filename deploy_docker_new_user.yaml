@@ -1,0 +1,87 @@
+- name: Install Docker
+  hosts: all
+  vars_files:
+    - project-vars
+  become: yes
+  tasks:
+    - name: Install docker
+      yum:
+        name: docker
+        state: present
+        update_cache: yes
+
+    - name: Start docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      register: service_status
+    - debug: msg="{{service_status.state}}"
+
+- name: Create new linux user
+  hosts: all
+  vars_files:
+    - project-vars
+  become: yes
+  tasks:
+    - name: Create linux user
+      user:
+        name: "{{linux_user}}"
+        groups: adm,docker
+
+
+- name: Install docker compose
+  hosts: all
+  become: yes
+  become_user: "{{ linux_user }}"
+  vars_files:
+    - project-vars
+  tasks:
+    - name: Create cli plugin directory
+      file:
+        path: "~/.docker/cli-plugins"
+        state: directory
+    - name: Get operating system info
+      command: uname -s
+      register: linux_os
+    - name: Get architecture
+      command: uname -m
+      register: linux_arch
+    - name: Download docker-compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-{{linux_os.stdout | lower}}-{{linux_arch.stdout}}"
+        dest: "/home/{{linux_user}}/.docker/cli-plugins/docker-compose"
+    - name: Add executable permisson to docker-compose
+      file:
+        path: "/home/{{linux_user}}/.docker/cli-plugins/docker-compose"
+        mode: +x
+    - name: check the docker compose version
+      command: docker compose version
+      register: compose_version
+    - debug: msg="{{compose_version.stdout}}"
+
+- name: Run docker images by docker compose
+  hosts: all
+  become: yes
+  become_user: "{{ linux_user }}"
+  vars_files:
+    - project-vars
+  tasks:
+    - name: Show current user
+      command: whoami
+      register: current_user
+    - debug: msg="Running as {{ current_user.stdout }}"
+    - name: Copy Docker Compose File to sever
+      copy:
+        src: docker-compose-full.yaml
+        dest: "/home/{{linux_user}}/docker-compose.yaml"
+    - name: Docker Login
+      community.docker.docker_login:
+        username: petrdeveloper
+        password: "{{dockerhub_password}}"
+    - name: Run docker compose
+      community.docker.docker_compose_v2:
+        project_src: "/home/{{linux_user}}"
+        files:
+          - docker-compose.yaml
+        state: present
