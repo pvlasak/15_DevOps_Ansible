@@ -82,6 +82,8 @@ A. Copy all files needed for Ansible configuration - ansible playbook, docker co
 - Jenkins accesses the AWS private key and copies a file to `/root/.ssh/` on ansible server
 
 B. execution of ansible commands on remote ansible server 
+
+- Jenkins plugin **SSH Pipeline Steps** must be installed, example is to be found in the plugin documentation
 - remote server must be defined as a groovy object.
 - using plugins `withCredentials` and `sshCommand` Jenkins is able to execute ansible playbook on a remote ansible server and configure AWS EC2 instances by running a docker compose file.
 
