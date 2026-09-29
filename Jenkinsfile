@@ -4,7 +4,7 @@ pipeline {
         maven 'Maven3.9'
     }
     environment {
-        ANSIBLE_SERVER = "165.22.90.213"
+        ANSIBLE_SERVER = "164.92.140.23"
     }
     stages {
         stage("Copy files") {
