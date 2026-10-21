@@ -25,7 +25,7 @@ repository to store project on configuration management with Ansible
     c) starts server.js
     d) checks if node process is running under defined user. 
 
-**branch deploy_nexus**
+**branch nexus_deploy**
 - `deploy_nexus.yaml` - definition of ansible playbook
 - updates apt cache, installs openjdk and net-tools
 - downloads tar archive, unpacks it and finds the nexus directory
